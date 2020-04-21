@@ -1,0 +1,18 @@
+{
+  "name": "picassowl",
+  "version": "1.0.0",
+  "description": "A simple image-manipulation webpage using Vue.js, Fastify, and Processing.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/nodemon/bin/nodemon.js ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Christopher Kei",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "cors": "^2.8.5",
+    "fastify": "^2.13.1",
+    "nodemon": "^2.0.3"
+  }
+}
