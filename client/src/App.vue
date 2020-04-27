@@ -2,30 +2,46 @@
   <div id="app">
     <h1>Picassowl</h1>
     <hr />
-    <h2>Image you want to draw:</h2>
-    <div
-      class="image-input"
-      :style="{ 'background-image': `url(${imageData})` }"
-      @click="chooseImage"
-    >
-      <span v-if="!imageData" class="placeholder">
-        Click me to input an image (480x320 works best)
-      </span>
-      <input
-        class="file-input"
-        ref="fileInput"
-        type="file"
-        @input="onSelectFile"
-      />
+    <div class="app-flex">
+      <div>
+        <h2>Image you want to draw:</h2>
+        <div
+          class="image-input"
+          :style="{ 'background-image': `url(${imageData})` }"
+          @click="chooseImage"
+        >
+          <span v-if="!imageData" class="placeholder">
+            Click me to input an image (480x320 works best)
+          </span>
+          <input
+            class="file-input"
+            ref="fileInput"
+            type="file"
+            @input="onSelectFile"
+          />
+        </div>
+        <h2>Simplified image preview:</h2>
+        <div class="modified-image">
+          <span v-if="!imageData" class="secondary-placeholder">
+            Waiting for image input
+          </span>
+          <canvas id="image-firstpass" width="480" height="320" />
+        </div>
+        <h4>
+          If you're not satisfied, pick a different image before proceeding
+        </h4>
+      </div>
+      <div class="middle-container" id="middle-container">
+        <h2>Show me the steps!</h2>
+        <button class="button" @click="showRight">
+          ⇨
+        </button>
+      </div>
+      <div class="right-container" id="right-container">
+        <h2>Steps:</h2>
+        <canvas id="image-secondpass" width="480" height="320" />
+      </div>
     </div>
-    <h2>Simplified image preview:</h2>
-    <div class="modified-image">
-      <span v-if="!imageData" class="secondary-placeholder">
-        Waiting for image input
-      </span>
-      <canvas id="image-firstpass" width="600" height="300" />
-    </div>
-    <h4>If you're not satisfied, pick a different image before proceeding</h4>
   </div>
 </template>
 
@@ -53,10 +69,12 @@ export default {
         const reader = new FileReader();
         reader.onload = (e) => {
           this.imageData = e.target.result;
-          var img = new Image();
+          const img = new Image();
           img.src = this.imageData;
-          var canvas = document.getElementById("image-firstpass");
-          var ctx = canvas.getContext("2d");
+          const canvas = document.getElementById("image-firstpass");
+          const ctx = canvas.getContext("2d");
+          const canvas2 = document.getElementById("image-secondpass");
+          const ctx2 = canvas2.getContext("2d");
           const width = 480;
           const height = 320;
 
@@ -94,14 +112,47 @@ export default {
                 updatedImageDataArr[currentIndex] = 255 - currentDiff / 2;
               }
             }
-            console.log(updatedImageData);
+
+            // process
+            for (let i = 0; i < arrHeightSlots; i++) {
+              for (let j = 0; j < arrWidthSlots; j = j + 4) {
+                const currentIndex = arrWidthSlots * i + j;
+                const min = Math.min(
+                  updatedImageDataArr[currentIndex],
+                  updatedImageDataArr[currentIndex + 1],
+                  updatedImageDataArr[currentIndex + 2]
+                );
+                const first = 205;
+                if (min <= first) {
+                  updatedImageDataArr[currentIndex] = min;
+                  updatedImageDataArr[currentIndex + 1] = min;
+                  updatedImageDataArr[currentIndex + 2] = min;
+                } else {
+                /*else if (min <= first + 20) {
+                  updatedImageDataArr[currentIndex] = 255;
+                  updatedImageDataArr[currentIndex + 1] = 0;
+                  updatedImageDataArr[currentIndex + 2] = 0;
+                  
+                } */
+                  updatedImageDataArr[currentIndex] = 255;
+                  updatedImageDataArr[currentIndex + 1] = 255;
+                  updatedImageDataArr[currentIndex + 2] = 255;
+                }
+              }
+            }
 
             ctx.putImageData(updatedImageData, 0, 0);
+            ctx2.putImageData(updatedImageData, 0, 0);
+            document.getElementById("middle-container").style.visibility =
+              "visible";
           };
         };
         reader.readAsDataURL(files[0]);
         this.$emit("input", files[0]);
       }
+    },
+    showRight() {
+      document.getElementById("right-container").style.visibility = "visible";
     },
   },
 };
@@ -113,8 +164,18 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  margin-top: 60px;
   text-align: left;
+}
+.app-flex {
+  display: flex;
+  flex-direction: row;
+}
+.middle-container {
+  display: flex;
+  flex-direction: column;
+  margin-left: 5rem;
+  justify-content: center;
+  visibility: hidden;
 }
 .image-input {
   display: block;
@@ -158,5 +219,16 @@ export default {
 }
 .file-input {
   display: none;
+}
+.button {
+  font-size: 40px;
+  border: none;
+  cursor: pointer;
+}
+.right-container {
+  display: flex;
+  flex-direction: column;
+  margin-left: 5rem;
+  visibility: hidden;
 }
 </style>
