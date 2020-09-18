@@ -66,6 +66,9 @@
         </div>
       </div>
     </div>
+    <div>
+      <h4 :style="{ 'text-align': 'right' }">A <a href="https://github.com/chriskei">Christopher Kei</a> website</h4>
+    </div>
   </div>
 </template>
 
